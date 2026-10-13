@@ -4,8 +4,8 @@ import {Camera} from 'lucide-react';
 import {Dialog,DialogContent,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 
 const photos=[
- {src:'/photos/after-1-private.svg',title:'Piso e iluminación instalados',alt:'Interior de la casa de Pacora después de las mejoras, con piso de cemento y una luz encendida.'},
- {src:'/photos/after-2-private.svg',title:'Así se ve el nuevo piso',alt:'Otra vista del piso de cemento instalado en los espacios interiores de la casa de Pacora.'},
+ {src:'/photos/after-1.jpg',title:'Piso e iluminación instalados',alt:'Interior de la casa de Pacora después de las mejoras, con piso de cemento y una luz encendida.'},
+ {src:'/photos/after-2.jpg',title:'Así se ve el nuevo piso',alt:'Otra vista del piso de cemento instalado en los espacios interiores de la casa de Pacora.'},
 ];
 export default function AfterGallery(){
  const [selected,setSelected]=useState<number|null>(null);
