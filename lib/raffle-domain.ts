@@ -1,0 +1,7 @@
+import {z} from 'zod';
+export const ticketIntentSchema=z.object({requestKey:z.string().uuid(),raffleId:z.enum(['rifa-001','rifa-002']),name:z.string().trim().min(2).max(120),whatsapp:z.string().trim().regex(/^\+?[\d\s()-]{7,25}$/).refine(s=>s.replace(/\D/g,'').length>=7&&s.replace(/\D/g,'').length<=15),quantity:z.number().int().min(1).max(100),consent:z.literal(true),adult:z.literal(true)});
+export function fundingSummary(rows:{source:string;amount_cents:number;status:string}[]){const result={direct:0,raffle:0,unclassified:0,total:0,hasConfirmed:false};for(const row of rows){if(row.status!=='confirmed')continue;if(!Number.isSafeInteger(row.amount_cents)||row.amount_cents<0)throw new Error('Invalid confirmed amount');if(!['direct','raffle','unclassified'].includes(row.source))throw new Error('Invalid source');result[row.source as 'direct'|'raffle'|'unclassified']+=row.amount_cents;result.hasConfirmed=true}result.total=result.direct+result.raffle+result.unclassified;return result}
+export interface CheckoutAdapter {createCheckout(input:{intentId:string;amountCents:number;currency:'USD'}):Promise<{url:string;providerReference:string}>}
+// A future authenticated, verified payment webhook writes a unique providerReference
+// to funding_entries. Browser requests can only create intents, never confirm money.
+export const checkoutDisabled:CheckoutAdapter={async createCheckout(){throw new Error('Los cobros todavía no están habilitados.')}};

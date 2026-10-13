@@ -1,0 +1,8 @@
+import {database} from './db';
+import {fundingSummary} from './raffle-domain';
+export async function raffleDatabase(){const db=database();await db.batch([
+ db.prepare("INSERT OR IGNORE INTO monthly_cases (id,place) VALUES ('001','Pacora')"),
+ db.prepare("INSERT OR IGNORE INTO monthly_cases (id,place) VALUES ('002','Darién')"),
+ db.prepare("INSERT OR IGNORE INTO raffles (id,case_id,status,prize,price_cents) VALUES ('rifa-001','001','closed','AirPods',2400)"),
+ db.prepare("INSERT OR IGNORE INTO raffles (id,case_id,status) VALUES ('rifa-002','002','planning')")]);return db}
+export async function publicRaffles(){const db=await raffleDatabase();const [rs,fs]=await Promise.all([db.prepare('SELECT * FROM raffles ORDER BY case_id DESC').all(),db.prepare("SELECT case_id,raffle_id,source,amount_cents,quantity,status FROM funding_entries WHERE status='confirmed'").all()]);return (rs.results as any[]).map(r=>{const funds=(fs.results as any[]).filter(f=>f.case_id===r.case_id);const ticketFunds=funds.filter(f=>f.raffle_id===r.id&&f.source==='raffle');const sold=r.historical_sold===null?null:r.historical_sold+ticketFunds.reduce((n,f)=>n+(f.quantity||0),0);return {id:r.id,caseId:r.case_id,place:r.case_id==='001'?'Pacora':'Darién',month:r.month,status:r.status,prize:r.prize,prizeImage:r.prize_image,prizeValueCents:r.prize_value_cents,prizeDonor:r.prize_donor,priceCents:r.price_cents,totalTickets:r.total_tickets,sold,available:sold!==null&&r.total_tickets!==null?Math.max(0,r.total_tickets-sold):null,drawAt:r.draw_at,winner:r.winner_display,evidenceUrl:r.evidence_url,yappy:r.yappy,bank:r.bank_instructions,whatsapp:r.whatsapp,funding:fundingSummary(funds)}})}
